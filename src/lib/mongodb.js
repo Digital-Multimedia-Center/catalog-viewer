@@ -31,6 +31,7 @@ export async function getEnrichedGames(limit = 40) {
     // Fetch the first 40 items
     const games = await collection
       .find({})
+      .sort({ release_date: -1 })
       .limit(limit)
       .toArray();
     
