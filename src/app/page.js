@@ -1,10 +1,16 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import { testConnection } from "@/lib/mongodb";
 
-export default function Home() {
+export default async function Home() {
+  const isConnected = await testConnection();
+
   return (
-    <div>
-      <p>Hello World</p>
+    <div style={{ padding: "20px" }}>
+      <h1>Database Status</h1>
+      {isConnected ? (
+        <p style={{ color: "green" }}>Successfully connected to MongoDB!</p>
+      ) : (
+        <p style={{ color: "red" }}>Failed to connect to MongoDB.</p>
+      )}
     </div>
   );
 }
