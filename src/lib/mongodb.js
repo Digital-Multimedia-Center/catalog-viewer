@@ -21,3 +21,24 @@ export async function testConnection() {
     await client.close();
   }
 }
+
+export async function getEnrichedGames(limit = 40) {
+  try {
+    await client.connect();
+    const database = client.db("enriched-game-data");
+    const collection = database.collection("enriched-items");
+
+    // Fetch the first 40 items
+    const games = await collection
+      .find({})
+      .limit(limit)
+      .toArray();
+    
+    return JSON.parse(JSON.stringify(games));
+  } catch (e) {
+    console.error(e);
+    return [];
+  } finally {
+    await client.close();
+  }
+}
