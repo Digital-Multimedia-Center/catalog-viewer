@@ -82,7 +82,12 @@ export default function GameCard({ game }) {
 
         {/* Metadata Footer */}
         <div style={{ marginTop: "15px", paddingTop: "15px", borderTop: "1px solid #333", fontSize: "0.8rem" }}>
-          <span>Source Entries: {game.dmc_entries}</span>
+          <span>
+            Source Entries:{" "}
+            {game.dmc_entries?.length
+              ? game.dmc_entries.map(entry => entry.platform_id_guess).join(", ")
+              : "None"}
+          </span>
           <span style={{ margin: "0 10px" }}>|</span>
           <span>Game Type: {game.game_type}</span>
         </div>

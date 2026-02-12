@@ -9,32 +9,30 @@ const client = new MongoClient(uri, {
   }
 });
 
-export async function testConnection() {
-  try {
-    await client.connect();
-    await client.db("admin").command({ ping: 1 });
-    return true;
-  } catch (e) {
-    console.error(e);
-    return false;
-  } finally {
-    await client.close();
-  }
-}
-
 export async function getEnrichedGames(limit = 40) {
   try {
     await client.connect();
     const database = client.db("enriched-game-data");
     const collection = database.collection("enriched-items");
 
-    // Fetch the first 40 items
-    const games = await collection
-      .find({})
-      .sort({ release_date: -1 })
-      .limit(limit)
-      .toArray();
-    
+    const games = await collection.aggregate([
+      // 1. Sort by release date (descending)
+      { $sort: { release_date: -1 } },
+
+      // 2. Limit number of documents
+      { $limit: limit },
+
+      // 3. Join with dmc-items
+      {
+        $lookup: {
+          from: "dmc-items",          // collection to join
+          localField: "dmc_entries",  // array of IDs in enriched-items
+          foreignField: "_id",        // matching field in dmc-items
+          as: "dmc_entries"           // overwrite with populated docs
+        }
+      }
+    ]).toArray();
+
     return JSON.parse(JSON.stringify(games));
   } catch (e) {
     console.error(e);
@@ -43,3 +41,4 @@ export async function getEnrichedGames(limit = 40) {
     await client.close();
   }
 }
+
