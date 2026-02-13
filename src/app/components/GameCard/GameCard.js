@@ -85,7 +85,13 @@ export default function GameCard({ game }) {
           <span>
             Source Entries:{" "}
             {game.dmc_entries?.length
-              ? game.dmc_entries.map(entry => entry.platform_id_guess).join(", ")
+              ? game.dmc_entries
+              .flatMap(entry =>
+                (entry.platform_id_guess || [])
+                .filter(p => p !== -1)
+                .map(p => p.name)
+              )
+              .join(", ")
               : "None"}
           </span>
           <span style={{ margin: "0 10px" }}>|</span>
