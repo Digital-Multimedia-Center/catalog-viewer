@@ -2,7 +2,7 @@ import { getEnrichedGames } from "@/lib/mongodb";
 import GameCard from "./components/GameCard/GameCard.js";
 
 export default async function Home() {
-  const games = await getEnrichedGames(1000);
+  const games = await getEnrichedGames(20);
 
   return (
   <main style={{ padding: "40px", maxWidth: "900px", margin: "0 auto"}}>
