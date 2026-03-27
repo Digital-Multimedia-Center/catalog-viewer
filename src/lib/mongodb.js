@@ -84,5 +84,30 @@ export async function getGenres() {
   }
 }
 
+export async function getPlatforms() {
+  try {
+    await client.connect();
+    const database = client.db("enriched-game-data");
+    const collection = database.collection("platform-data");
 
+    const platforms = await collection.aggregate([
+      {
+       $project: {
+       _id: 1,
+       name: 1,
+       created_at: 1
+       }
+      }
+    ]).toArray();
+
+    return JSON.parse(JSON.stringify(platforms));
+  } catch (e) {
+    console.error("Error fetching platforms:", e);
+    return [];
+  } finally {
+    // Note: In a Next.js environment, frequent closing/opening 
+    // of connections can be slow. Consider a global connection pattern.
+    await client.close();
+  }
+}
 

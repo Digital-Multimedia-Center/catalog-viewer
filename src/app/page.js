@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
@@ -12,8 +13,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-
 import GameCard from "./components/GameCard/GameCard.js";
+import {DropdownMenuCheckboxes} from "./components/FilterCheckbox/FilterCheckbox.js";
 
 export default async function Home() {
   const games = await getEnrichedGames(20);
@@ -30,9 +31,10 @@ export default async function Home() {
         <DropdownMenuContent>
           <DropdownMenuGroup>
             <DropdownMenuLabel>Modern</DropdownMenuLabel>
-            <DropdownMenuItem>PlayStation 5</DropdownMenuItem>
-            <DropdownMenuItem>PlayStation 4</DropdownMenuItem>
-            <DropdownMenuItem>Xbox One Series X</DropdownMenuItem>
+            <DropdownMenuCheckboxes></DropdownMenuCheckboxes>
+            <DropdownMenuCheckboxItem>PlayStation 5</DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem>PlayStation 4</DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem>Xbox One Series X</DropdownMenuCheckboxItem>
           </DropdownMenuGroup>
           <DropdownMenuGroup>
             <DropdownMenuSeparator />
