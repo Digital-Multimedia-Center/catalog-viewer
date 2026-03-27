@@ -66,8 +66,7 @@ export async function getGenres() {
       // 4. Project into a clean format for your dropdown
       {
         $project: {
-          _id: 0,
-          id: "$_id",
+          _id: 1,
           name: 1
         }
       }
@@ -97,6 +96,9 @@ export async function getPlatforms() {
        name: 1,
        created_at: 1
        }
+      },
+      {
+        $sort : {created_at: 1}
       }
     ]).toArray();
 

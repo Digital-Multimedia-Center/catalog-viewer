@@ -10,22 +10,40 @@ import {
   DropdownMenuGroup,
   DropdownMenuLabel,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuItem
 } from "@/components/ui/dropdown-menu"
 
-export function DropdownMenuCheckboxes() {
-  const [showStatusBar, setShowStatusBar] = React.useState(true)
+export function FilterDropdownMenu({ items = [], category }) {
+  // Store selected IDs in an array
+  const [selectedIds, setSelectedIds] = React.useState([])
 
-  const toggleStatusBar = () => {
-    setShowStatusBar((prev) => !prev);
-  };
+  // Toggle selection logic
+  const handleCheckedChange = (id) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) 
+        ? prev.filter((itemId) => itemId !== id) 
+        : [...prev, id]
+    )
+  }
 
   return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline">{category}</Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        {items.map((item) => (
           <DropdownMenuCheckboxItem
-            checked={showStatusBar}
-            onCheckedChange={toggleStatusBar}
+            key={item._id}
+            checked={selectedIds.includes(item._id)}
+            onCheckedChange={() => handleCheckedChange(item._id)}
+            onSelect={(e) => e.preventDefault()}
           >
-            Status Bar
+            {item.name}
           </DropdownMenuCheckboxItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
-
