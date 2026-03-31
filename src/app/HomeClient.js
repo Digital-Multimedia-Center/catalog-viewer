@@ -5,6 +5,7 @@ import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination"
+import { Button } from "@/components/ui/button.jsx"
 
 import { GameCard } from "./components/GameCard/GameCard.js";
 import { LimitSelector } from "./components/LimitSelector/LimitSelector.js";
@@ -17,6 +18,7 @@ export default function Home({ initialGenres, initialPlatforms }) {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(25);
   const [filters, setFilters] = useState({ Platforms: [], Genres: [] });
+  const [appliedFilters, setAppliedFilters] = useState({ Platforms: [], Genres: [] });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -25,8 +27,8 @@ export default function Home({ initialGenres, initialPlatforms }) {
         const query = new URLSearchParams({
           page: page.toString(),
           limit: limit.toString(),
-          platforms: filters.Platforms.join(","),
-          genres: filters.Genres.join(",")
+          platforms: appliedFilters.Platforms.join(","),
+          genres: appliedFilters.Genres.join(",")
         });
 
         try {
@@ -40,10 +42,15 @@ export default function Home({ initialGenres, initialPlatforms }) {
         }
       };
       fetchData();
-    }, [page, limit, filters]);
+    }, [page, limit, appliedFilters]);
 
   const handleFilterChange = (category, selectedIds) => {
     setFilters(prev => ({ ...prev, [category]: selectedIds }));
+  };
+
+  const handleApply = () => {
+    setAppliedFilters(filters);
+    setPage(1);
   };
 
   return (
@@ -62,6 +69,9 @@ export default function Home({ initialGenres, initialPlatforms }) {
         selected={filters.Genres}
         onSelectionChange={(ids) => handleFilterChange("Genres", ids)}
       />
+      <Button onClick={handleApply}>
+          Apply Filters
+      </Button>
 
       {games.map((game) => (<GameCard key={game._id} game={game} />))}
 

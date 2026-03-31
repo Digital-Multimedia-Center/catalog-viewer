@@ -8,6 +8,6 @@ export async function GET(request) {
   const platforms = searchParams.get("platforms")?.split(",") || [];
   const genres = searchParams.get("genres")?.split(",") || [];
 
-  const games = await getEnrichedGames(page, limit, { platforms, genres });
+  const games = await getEnrichedGames(page, limit);
   return NextResponse.json(games);
 }

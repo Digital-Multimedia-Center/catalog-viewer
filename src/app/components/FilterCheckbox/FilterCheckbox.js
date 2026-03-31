@@ -18,7 +18,7 @@ export function FilterDropdownMenu({ items = [], category, selected = [], onSele
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline">
-          {category} {selected.length > 0 && `(${selected.length})`}
+          {category}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
