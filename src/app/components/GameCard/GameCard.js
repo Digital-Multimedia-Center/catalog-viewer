@@ -1,8 +1,8 @@
 import Image from "next/image";
 
-export default function GameCard({ game }) {
+export function GameCard({ game }) {
   // Convert Unix timestamp to readable date
-  const releaseDate = game.release_date 
+  const releaseDate = game.release_date
     ? new Date(game.release_date * 1000).toLocaleDateString("en-US", {
         year: 'numeric',
         month: 'short',
@@ -11,7 +11,7 @@ export default function GameCard({ game }) {
     : "TBD";
 
   // Construct the IGDB cover URL
-  const coverUrl = game.cover?.image_id 
+  const coverUrl = game.cover?.image_id
     ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${game.cover.image_id}.jpg`
     : "/api/placeholder/400/600"; // Fallback placeholder
 
@@ -26,16 +26,16 @@ export default function GameCard({ game }) {
     }}>
       {/* Game Cover */}
       <div style={{ flexShrink: 0 }}>
-      <Image 
-        src={coverUrl} 
+      <Image
+        src={coverUrl}
         alt={`${game.name} cover`}
         width={150}
         height={200}
-        style={{ 
+        style={{
           borderRadius: "8px",
           boxShadow: "0 4px 10px rgba(0,0,0,0.5)",
           objectFit: "cover"
-        }} 
+        }}
         priority={false}
       />
       </div>
@@ -69,9 +69,9 @@ export default function GameCard({ game }) {
         </div>
 
         {/* Summary */}
-        <p style={{ 
-          fontSize: "0.95rem", 
-          lineHeight: "1.5", 
+        <p style={{
+          fontSize: "0.95rem",
+          lineHeight: "1.5",
           overflow: "hidden",
           display: "-webkit-box",
           WebkitLineClamp: 3,
