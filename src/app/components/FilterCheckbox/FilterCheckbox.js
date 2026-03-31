@@ -1,42 +1,31 @@
 "use client"
 
 import * as React from "react"
-
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuItem
-} from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
-export function FilterDropdownMenu({ items = [], category }) {
-  // Store selected IDs in an array
-  const [selectedIds, setSelectedIds] = React.useState([])
-
-  // Toggle selection logic
+export function FilterDropdownMenu({ items = [], category, selected = [], onSelectionChange }) {
   const handleCheckedChange = (id) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) 
-        ? prev.filter((itemId) => itemId !== id) 
-        : [...prev, id]
-    )
+    const isSelected = selected.includes(id);
+    const nextSelected = isSelected
+      ? selected.filter((itemId) => itemId !== id)
+      : [...selected, id];
+
+    onSelectionChange(nextSelected);
   }
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">{category}</Button>
+        <Button variant="outline">
+          {category} {selected.length > 0 && `(${selected.length})`}
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         {items.map((item) => (
           <DropdownMenuCheckboxItem
             key={item._id}
-            checked={selectedIds.includes(item._id)}
+            checked={selected.includes(item._id)}
             onCheckedChange={() => handleCheckedChange(item._id)}
             onSelect={(e) => e.preventDefault()}
           >
