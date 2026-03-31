@@ -9,15 +9,18 @@ const client = new MongoClient(uri, {
   }
 });
 
-export async function getEnrichedGames(limit = 40) {
+export async function getEnrichedGames(page = 1, limit = 40) {
   try {
     await client.connect();
     const database = client.db("enriched-game-data");
     const collection = database.collection("enriched-items");
+    const skipCount = (page - 1) * limit
 
     const games = await collection.aggregate([
       // 1. Sort by release date (descending)
       { $sort: { release_date: -1 } },
+
+      { $skip: skipCount },
 
       // 2. Limit number of documents
       { $limit: limit },
@@ -51,7 +54,7 @@ export async function getGenres() {
     const genres = await collection.aggregate([
       // 1. Flatten the genres array from all documents
       { $unwind: "$genres" },
-      
+
       // 2. Group by the genre ID to get unique entries
       {
         $group: {
@@ -77,7 +80,7 @@ export async function getGenres() {
     console.error("Error fetching genres:", e);
     return [];
   } finally {
-    // Note: In a Next.js environment, frequent closing/opening 
+    // Note: In a Next.js environment, frequent closing/opening
     // of connections can be slow. Consider a global connection pattern.
     await client.close();
   }
@@ -107,9 +110,8 @@ export async function getPlatforms() {
     console.error("Error fetching platforms:", e);
     return [];
   } finally {
-    // Note: In a Next.js environment, frequent closing/opening 
+    // Note: In a Next.js environment, frequent closing/opening
     // of connections can be slow. Consider a global connection pattern.
     await client.close();
   }
 }
-
