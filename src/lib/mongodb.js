@@ -9,33 +9,50 @@ const client = new MongoClient(uri, {
   }
 });
 
-export async function getEnrichedGames(page = 1, limit = 40) {
+export async function getEnrichedGames(page = 1, limit = 40, platforms = [], genres = []) {
   try {
     await client.connect();
     const database = client.db("enriched-game-data");
     const collection = database.collection("enriched-items");
-    const skipCount = (page - 1) * limit
+    const skipCount = (page - 1) * limit;
 
-    const games = await collection.aggregate([
-      // 1. Sort by release date (descending)
+    // 1. Initial filter for genres (exists on root document)
+    const initialMatch = {};
+    if (genres.length > 0) {
+      initialMatch["genres.id"] = { $in: genres };
+    }
+
+    const pipeline = [
+      { $match: initialMatch },
       { $sort: { release_date: -1 } },
-
-      { $skip: skipCount },
-
-      // 2. Limit number of documents
-      { $limit: limit },
-
-      // 3. Join with dmc-items
+      // Note: skip/limit here might be inaccurate if many items 
+      // are filtered out by the platform check later. 
+      // For strict accuracy, move skip/limit to the very end.
+      
       {
         $lookup: {
-          from: "dmc-items",          // collection to join
-          localField: "dmc_entries",  // array of IDs in enriched-items
-          foreignField: "_id",        // matching field in dmc-items
-          as: "dmc_entries"           // overwrite with populated docs
+          from: "dmc-items",
+          localField: "dmc_entries",
+          foreignField: "_id",
+          as: "dmc_entries"
         }
       }
-    ]).toArray();
+    ];
 
+    // 2. Filter by Platform ID inside the joined dmc_entries
+    if (platforms.length > 0) {
+      pipeline.push({
+        $match: {
+          "dmc_entries.platform_id_guess.id": { $in: platforms }
+        }
+      });
+    }
+
+    // 3. Final Pagination
+    pipeline.push({ $skip: skipCount });
+    pipeline.push({ $limit: limit });
+
+    const games = await collection.aggregate(pipeline).toArray();
     return JSON.parse(JSON.stringify(games));
   } catch (e) {
     console.error(e);
@@ -44,6 +61,49 @@ export async function getEnrichedGames(page = 1, limit = 40) {
     await client.close();
   }
 }
+
+// export async function getEnrichedGames(page = 1, limit = 40, platforms=[], genres=[]) {
+//   try {
+//     await client.connect();
+//     const database = client.db("enriched-game-data");
+//     const collection = database.collection("enriched-items");
+//     const skipCount = (page - 1) * limit
+//
+//     const query = {};
+//     if (platforms.length > 0) {
+//       query.platforms = { $in: platforms.map(Number) };
+//     }
+//     if (genres.length > 0) {
+//       query["genres.name"] = { $in: genres };
+//     }
+//
+//     const games = await collection.aggregate([
+//       { $match: query },
+//
+//       { $sort: { release_date: -1 } },
+//
+//       { $skip: skipCount },
+//
+//       { $limit: limit },
+//
+//       {
+//         $lookup: {
+//           from: "dmc-items",          // collection to join
+//           localField: "dmc_entries",  // array of IDs in enriched-items
+//           foreignField: "_id",        // matching field in dmc-items
+//           as: "dmc_entries"           // overwrite with populated docs
+//         }
+//       }
+//     ]).toArray();
+//
+//     return JSON.parse(JSON.stringify(games));
+//   } catch (e) {
+//     console.error(e);
+//     return [];
+//   } finally {
+//     await client.close();
+//   }
+// }
 
 export async function getGenres() {
   try {
