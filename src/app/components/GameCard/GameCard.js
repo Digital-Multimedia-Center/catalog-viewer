@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-export function GameCard({ game }) {
+export function GameCard({ game, allPlatforms }) {
   // Convert Unix timestamp to readable date
   const releaseDate = game.release_date
     ? new Date(game.release_date * 1000).toLocaleDateString("en-US", {
@@ -24,20 +24,23 @@ export function GameCard({ game }) {
       marginBottom: "20px",
       overflow: "hidden"
     }}>
+
       {/* Game Cover */}
       <div style={{ flexShrink: 0 }}>
-      <Image
-        src={coverUrl}
-        alt={`${game.name} cover`}
-        width={150}
-        height={200}
-        style={{
-          borderRadius: "8px",
-          boxShadow: "0 4px 10px rgba(0,0,0,0.5)",
-          objectFit: "cover"
-        }}
-        priority={false}
-      />
+        <a href={`https://catalog.lib.msu.edu/Record/${game.dmc_entries[0]._id}`} target="_blank">
+          <Image
+          src={coverUrl}
+          alt={`${game.name} cover`}
+          width={150}
+          height={200}
+          style={{
+            borderRadius: "8px",
+            boxShadow: "0 4px 10px rgba(0,0,0,0.5)",
+            objectFit: "cover"
+          }}
+          priority={false}
+          />
+        </a>
       </div>
 
       {/* Game Details */}
@@ -89,8 +92,11 @@ export function GameCard({ game }) {
                 ...new Set(
                   game.dmc_entries.flatMap(entry =>
                     (entry.platform_id_guess || [])
-                    .filter(p => p && p !== -1)
-                    .map(p => p.name)
+                      .filter(id => id && id !== -1)
+                      .map(id => {
+                        const platform = allPlatforms.find(p => p._id === id);
+                        return platform ? platform.name : null;
+                      })
                   )
                 )
               ].join(", ")

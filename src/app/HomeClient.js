@@ -73,7 +73,7 @@ export default function Home({ initialGenres, initialPlatforms }) {
           Apply Filters
       </Button>
 
-      {games.map((game) => (<GameCard key={game._id} game={game} />))}
+      {games.map((game) => (<GameCard key={game._id} game={game} allPlatforms={initialPlatforms} />))}
 
       <div className="flex items-center justify-between gap-4">
         <Field orientation="horizontal" className="w-fit">
