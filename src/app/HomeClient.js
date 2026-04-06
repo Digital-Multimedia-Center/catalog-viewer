@@ -17,6 +17,8 @@ export default function Home({ initialGenres, initialPlatforms }) {
   const [games, setGames] = useState([]);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(25);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [appliedSearch, setAppliedSearch] = useState("");
   const [filters, setFilters] = useState({ Platforms: [], Genres: [] });
   const [appliedFilters, setAppliedFilters] = useState({ Platforms: [], Genres: [] });
   const [loading, setLoading] = useState(false);
@@ -27,6 +29,7 @@ export default function Home({ initialGenres, initialPlatforms }) {
         const query = new URLSearchParams({
           page: page.toString(),
           limit: limit.toString(),
+          search: appliedSearch,
           platforms: appliedFilters.Platforms.join(","),
           genres: appliedFilters.Genres.join(",")
         });
@@ -42,7 +45,7 @@ export default function Home({ initialGenres, initialPlatforms }) {
         }
       };
       fetchData();
-    }, [page, limit, appliedFilters]);
+    }, [page, limit, appliedFilters, appliedSearch]);
 
   const handleFilterChange = (category, selectedIds) => {
     setFilters(prev => ({ ...prev, [category]: selectedIds }));
@@ -50,13 +53,18 @@ export default function Home({ initialGenres, initialPlatforms }) {
 
   const handleApply = () => {
     setAppliedFilters(filters);
+    setAppliedSearch(searchTerm);
     setPage(1);
   };
 
   return (
   <main style={{ padding: "40px", maxWidth: "75%", margin: "0 auto"}}>
       <h1 style={{ marginBottom: "30px" }}>Enriched Collection</h1>
-      <Input />
+      <Input
+        placeholder="Search titles..."
+        value={searchTerm} 
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
       <FilterDropdownMenu
         items={initialPlatforms}
         category={"Platforms"}

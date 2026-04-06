@@ -7,7 +7,8 @@ export async function GET(request) {
   const limit = Number(searchParams.get("limit")) || 25;
   const platforms = searchParams.get("platforms")?.split(",").filter(Boolean).map(Number) || [];
   const genres = searchParams.get("genres")?.split(",").filter(Boolean).map(Number) || [];
+  const search = searchParams.get("search") || ""; // Get the search term
 
-  const games = await getEnrichedGames(page, limit, platforms, genres);
+  const games = await getEnrichedGames(page, limit, platforms, genres, search);
   return NextResponse.json(games);
 }

@@ -9,26 +9,32 @@ const client = new MongoClient(uri, {
   }
 });
 
-export async function getEnrichedGames(page = 1, limit = 40, platforms = [], genres = []) {
+export async function getEnrichedGames(page = 1, limit = 40, platforms = [], genres = [], searchTerm = "") {
   try {
     await client.connect();
     const database = client.db("enriched-game-data");
     const collection = database.collection("enriched-items");
     const skipCount = (page - 1) * limit;
 
-    // 1. Initial filter for genres (exists on root document)
     const initialMatch = {};
+
+    if (searchTerm) {
+      initialMatch.name = { $regex: searchTerm, $options: "i" }; 
+    }
+
     if (genres.length > 0) {
       initialMatch["genres.id"] = { $in: genres };
+    }
+
+    if (platforms.length > 0) {
+      initialMatch.platforms = { $in: platforms };
     }
 
     const pipeline = [
       { $match: initialMatch },
       { $sort: { release_date: -1 } },
-      // Note: skip/limit here might be inaccurate if many items
-      // are filtered out by the platform check later.
-      // For strict accuracy, move skip/limit to the very end.
-
+      { $skip: skipCount },
+      { $limit: limit },
       {
         $lookup: {
           from: "dmc-items",
@@ -38,19 +44,6 @@ export async function getEnrichedGames(page = 1, limit = 40, platforms = [], gen
         }
       }
     ];
-
-    // 2. Filter by Platform ID inside the joined dmc_entries
-    if (platforms.length > 0) {
-      pipeline.push({
-        $match: {
-          "dmc_entries.platform_id_guess": { $in: platforms }
-        }
-      });
-    }
-
-    // 3. Final Pagination
-    pipeline.push({ $skip: skipCount });
-    pipeline.push({ $limit: limit });
 
     const games = await collection.aggregate(pipeline).toArray();
     return JSON.parse(JSON.stringify(games));
