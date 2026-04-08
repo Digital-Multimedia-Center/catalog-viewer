@@ -18,23 +18,13 @@ export async function getEnrichedGames(page = 1, limit = 40, platforms = [], gen
 
     const initialMatch = {};
 
-    if (searchTerm) {
-      initialMatch.name = { $regex: searchTerm, $options: "i" }; 
-    }
+    if (searchTerm) initialMatch.name = { $regex: searchTerm, $options: "i" };
 
-    if (genres.length > 0) {
-      initialMatch["genres.id"] = { $in: genres };
-    }
+    if (genres.length > 0) initialMatch["genres.id"] = { $in: genres };
 
-    if (platforms.length > 0) {
-      initialMatch.platforms = { $in: platforms };
-    }
 
     const pipeline = [
       { $match: initialMatch },
-      { $sort: { release_date: -1 } },
-      { $skip: skipCount },
-      { $limit: limit },
       {
         $lookup: {
           from: "dmc-items",
@@ -44,6 +34,18 @@ export async function getEnrichedGames(page = 1, limit = 40, platforms = [], gen
         }
       }
     ];
+
+    if (platforms.length > 0) {
+      pipeline.push({
+        $match: { "dmc_entries.platform_id_guess": { $in: platforms } }
+      });
+    }
+
+    pipeline.push(
+      { $sort: { release_date: -1 } },
+      { $skip: skipCount },
+      { $limit: limit }
+    )
 
     const games = await collection.aggregate(pipeline).toArray();
     return JSON.parse(JSON.stringify(games));
