@@ -1,6 +1,8 @@
 import { getGenres, getPlatforms } from "@/lib/mongodb";
 import HomeClient from "./HomeClient";
 
+export const dynamic = 'force-dynamic';
+
 export default async function Page() {
   const initialGenres = await getGenres();
   const initialPlatforms = await getPlatforms();

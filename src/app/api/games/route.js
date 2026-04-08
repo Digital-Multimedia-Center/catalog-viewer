@@ -1,6 +1,8 @@
 import { getEnrichedGames } from "@/lib/mongodb";
 import { NextResponse } from "next/server";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const page = Number(searchParams.get("page")) || 1;
