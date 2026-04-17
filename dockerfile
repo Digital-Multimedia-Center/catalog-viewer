@@ -4,7 +4,7 @@ FROM node:alpine AS builder
 WORKDIR /app
 
 ARG MONGODB_URI
-ENV MONGODB_URI=mongodb://admin:password@mongodb:27017/games_db?authSource=admin
+ENV MONGODB_URI=${MONGODB_URI}
 
 COPY package.json package-lock.json ./
 RUN npm ci
@@ -18,7 +18,7 @@ RUN mkdir /app
 WORKDIR /app
 
 
-ENV MONGODB_URI=mongodb://admin:password@mongodb:27017/games_db?authSource=admin
+ENV MONGODB_URI=${MONGODB_URI}
 
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
