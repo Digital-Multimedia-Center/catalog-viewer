@@ -18,6 +18,7 @@ RUN mkdir /app
 WORKDIR /app
 
 
+ARG MONGODB_URI
 ENV MONGODB_URI=${MONGODB_URI}
 
 COPY package.json package-lock.json ./
