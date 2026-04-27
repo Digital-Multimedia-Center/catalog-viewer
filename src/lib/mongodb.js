@@ -12,6 +12,15 @@ const client = new MongoClient(uri, {
 });
 
 export async function getEnrichedGames(page = 1, limit = 40, platforms = [], genres = [], searchTerm = "") {
+  /*
+  This function is used to filter the database and return the matches with pagination.
+
+  page (int) : integer starting at 1 indicating pagination state
+  limit (int) : used with page to determine how many items to skip (page - 1) * limit = skipCount
+  platforms (list of ints) : platform ids, filtered with "OR". i.e platform 1 OR platform 2, not platform 1 AND platform 2
+  genres (list of ints) : genre ids also filtered by "OR"
+  searchTerm (str) : match searchTerm to game titles
+  */
   try {
     await client.connect();
     const database = client.db("enriched-game-data");
@@ -60,6 +69,9 @@ export async function getEnrichedGames(page = 1, limit = 40, platforms = [], gen
 }
 
 export async function getGenres() {
+  /*
+  Dynamically queries every genre in our enriched-items mongodb collection. If new genres are added or removed, we can dynamically fetch
+  */
   try {
     await client.connect();
     const database = client.db("enriched-game-data");
@@ -101,6 +113,9 @@ export async function getGenres() {
 }
 
 export async function getPlatforms() {
+  /*
+  Dynamically queries platforms in our enriched-items mongodb collection. If new platforms are added or removed, we can dynamically fetch
+  */
   try {
     await client.connect();
     const database = client.db("enriched-game-data");
