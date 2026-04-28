@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-export function GameCard({ game, allPlatforms }) {
+export function GameCard({ game}) {
   // Convert Unix timestamp to readable date
   const releaseDate = game.release_date
     ? new Date(game.release_date * 1000).toLocaleDateString("en-US", {
@@ -27,8 +27,7 @@ export function GameCard({ game, allPlatforms }) {
 
       {/* Game Cover */}
       <div style={{ flexShrink: 0 }}>
-        <a href={`https://catalog.lib.msu.edu/Record/${game.dmc_entries[0]._id}`} target="_blank">
-          <Image
+        <Image
           src={coverUrl}
           alt={`${game.name} cover`}
           width={150}
@@ -39,8 +38,7 @@ export function GameCard({ game, allPlatforms }) {
             objectFit: "cover"
           }}
           priority={false}
-          />
-        </a>
+        />
       </div>
 
       {/* Game Details */}
@@ -87,23 +85,20 @@ export function GameCard({ game, allPlatforms }) {
         <div style={{ marginTop: "15px", paddingTop: "15px", borderTop: "1px solid #333", fontSize: "0.8rem" }}>
           <span>
             Source Entries:{" "}
-            {game.dmc_entries?.length
-              ? [
-                ...new Set(
-                  game.dmc_entries.flatMap(entry =>
-                    (entry.platform_id_guess || [])
-                      .filter(id => id && id !== -1)
-                      .map(id => {
-                        const platform = allPlatforms.find(p => p._id === id);
-                        return platform ? platform.name : null;
-                      })
-                  )
-                )
-              ].join(", ")
-              : "None"}
+              {game.dmc_entries?.map((entry, index) => (
+                <span key={entry.folioid}>
+                  <a
+                    href={`https://catalog.lib.msu.edu/Record/${entry.folioid}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: "#3498db" }}
+                  >
+                    {entry.platform}
+                  </a>
+                  {index < game.dmc_entries.length - 1 && ", "}
+                </span>
+              ))}
           </span>
-          <span style={{ margin: "0 10px" }}>|</span>
-          <span>Game Type: {game.game_type}</span>
         </div>
       </div>
     </div>

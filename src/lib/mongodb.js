@@ -39,18 +39,51 @@ export async function getEnrichedGames(page = 1, limit = 40, platforms = [], gen
       {
         $lookup: {
           from: "dmc-items",
-          localField: "dmc_entries",
-          foreignField: "_id",
+          let: { target_ids: "$dmc_entries.folioid" },
+          pipeline: [
+            // Match the folio IDs from the main document
+            { $match: { $expr: { $in: ["$_id", "$$target_ids"] } } },
+            // Join with platform-data to get the name
+            {
+              $lookup: {
+                from: "platform-data",
+                localField: "platform_id_guess",
+                foreignField: "_id",
+                as: "platform_info"
+              }
+            },
+            // Add the platform name and keep necessary fields
+            {
+              $addFields: {
+                platform_name: { $arrayElemAt: ["$platform_info.name", 0] }
+              }
+            }
+          ],
           as: "dmc_entries"
         }
       }
-    ];
+    ];  
 
     if (platforms.length > 0) {
       pipeline.push({
         $match: { "dmc_entries.platform_id_guess": { $in: platforms } }
       });
     }
+
+    pipeline.push({
+      $set: {
+        dmc_entries: {
+          $map: {
+            input: "$dmc_entries",
+            as: "entry",
+            in: {
+              folioid: "$$entry._id",
+              platform: "$$entry.platform_name"
+            }
+          }
+        }
+      }
+    });
 
     pipeline.push(
       { $sort: { release_date: -1 } },
