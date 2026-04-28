@@ -152,28 +152,61 @@ export async function getPlatforms() {
   try {
     await client.connect();
     const database = client.db("enriched-game-data");
-    const collection = database.collection("platform-data");
+    
+    const collection = database.collection("enriched-items");
 
     const platforms = await collection.aggregate([
+      // get all folioids from the dmc_entries array across all games
+      { $unwind: "$dmc_entries" },
+      
+      // join with dmc-items to get the platform_id_guess
       {
-       $project: {
-       _id: 1,
-       name: 1,
-       created_at: 1
-       }
+        $lookup: {
+          from: "dmc-items",
+          localField: "dmc_entries.folioid",
+          foreignField: "_id",
+          as: "dmc_item_info"
+        }
       },
+      { $unwind: "$dmc_item_info" },
+      
+      // unwind the platform_id_guess array (since it's a list in dmc-items)
+      { $unwind: "$dmc_item_info.platform_id_guess" },
+      
+      // group by the platform ID to get a unique list of IDs present in the data
       {
-        $sort : {created_at: 1}
-      }
+        $group: {
+          _id: "$dmc_item_info.platform_id_guess"
+        }
+      },
+      
+      // join with platform-data to get the actual platform names/details
+      {
+        $lookup: {
+          from: "platform-data",
+          localField: "_id",
+          foreignField: "_id",
+          as: "details"
+        }
+      },
+      { $unwind: "$details" },
+      
+      // format the output and sort
+      {
+        $project: {
+          _id: "$details._id",
+          name: "$details.name",
+          created_at: "$details.created_at"
+        }
+      },
+      { $sort: { name: 1 } }
     ]).toArray();
 
     return JSON.parse(JSON.stringify(platforms));
   } catch (e) {
-    console.error("Error fetching platforms:", e);
+    console.error("Error fetching filtered platforms:", e);
     return [];
   } finally {
-    // Note: In a Next.js environment, frequent closing/opening
-    // of connections can be slow. Consider a global connection pattern.
     await client.close();
   }
 }
